@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DriveEasy - Car Rental Management</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: Arial, sans-serif; background: #f5f7fb; color: #172033; line-height: 1.6; }
+header { background: #101b30; color: white; padding: 18px 8%; display: flex; justify-content: space-between; align-items: center; }
+.logo { font-size: 26px; font-weight: bold; }
+.logo span { color: #ffb703; }
+nav { display: flex; gap: 22px; }
+nav a { color: white; text-decoration: none; }
+nav a:hover { color: #ffb703; }
+.hero { min-height: 370px; display: flex; align-items: center; padding: 50px 8%; color: white; background: linear-gradient(90deg, #101b30, #334b6a); }
+.hero h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.2; margin: 12px 0; }
+.hero p { margin-bottom: 22px; }
+.tagline { color: #ffca45; letter-spacing: 2px; font-weight: bold; }
+.hero-btn { display: inline-block; padding: 12px 22px; background: #ffb703; color: #172033; border-radius: 6px; text-decoration: none; font-weight: bold; }
+.section { max-width: 1150px; margin: auto; padding: 45px 24px; }
+.section h2 { text-align: center; font-size: 29px; }
+.section-desc { text-align: center; color: #64748b; margin: 8px 0 25px; }
+.car-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.car-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 20px #00000010; }
+.car-card img { width: 100%; height: 180px; object-fit: cover; background: #e2e8f0; }
+.car-info { padding: 18px; }
+.car-info p { color: #64748b; margin: 5px 0 12px; }
+.car-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.car-price { color: #1d4ed8; font-weight: bold; font-size: 18px; }
+button { cursor: pointer; border: none; border-radius: 6px; padding: 10px 13px; font-size: 14px; }
+.select-car { background: #1d4ed8; color: white; }
+.booking-section { max-width: 700px; }
+#bookingForm { background: white; padding: 28px; border-radius: 12px; box-shadow: 0 5px 20px #00000010; }
+label { display: block; font-weight: bold; margin: 14px 0 6px; }
+input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: white; font-size: 15px; }
+input:focus, select:focus { outline: 2px solid #93c5fd; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.price-box { margin-top: 24px; padding: 16px; background: #eff6ff; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.price-box strong { color: #1d4ed8; font-size: 22px; }
+#bookButton { width: 100%; margin-top: 20px; padding: 14px; background: #101b30; color: white; font-weight: bold; font-size: 16px; }
+#bookButton:hover { background: #1d4ed8; }
+#message { margin-top: 14px; font-weight: bold; overflow-wrap: anywhere; }
+#bookingList { display: grid; gap: 12px; }
+.booking-record { background: white; border-left: 4px solid #1d4ed8; border-radius: 8px; padding: 18px; overflow-wrap: anywhere; }
+.booking-record p { color: #475569; margin-top: 5px; }
+.cancel-booking { margin-top: 10px; background: #fee2e2; color: #991b1b; }
+.empty-state { background: white; padding: 20px; text-align: center; color: #64748b; border-radius: 8px; }
+footer { text-align: center; padding: 24px; background: #101b30; color: #cbd5e1; font-size: 14px; }
+@media (max-width: 800px) { .car-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } header { padding: 16px 5%; } }
+@media (max-width: 560px) { header { flex-direction: column; gap: 12px; } nav { gap: 14px; flex-wrap: wrap; justify-content: center; } .car-grid, .form-row { grid-template-columns: 1fr; } .hero { padding: 40px 6%; } #bookingForm { padding: 20px; } }
+</style>
+</head>
+<body>
+<header>
+    <div class="logo">Drive<span>Easy</span></div>
+    <nav>
+        <a href="#home">Home</a><a href="#cars">Our Cars</a><a href="#booking">Book a Car</a><a href="#records">Bookings</a>
+    </nav>
+</header>
+<section class="hero" id="home">
+    <div>
+        <p class="tagline">YOUR JOURNEY, YOUR WAY</p>
+        <h1>Find the Perfect Car<br>for Your Next Trip</h1>
+        <p>Affordable prices. Comfortable rides. Easy booking.</p>
+        <a href="#cars" class="hero-btn">Explore Cars</a>
+    </div>
+</section>
+<main>
+<section class="section" id="cars">
+    <h2>Available Cars</h2><p class="section-desc">Choose a car that suits your journey.</p>
+    <div class="car-grid" id="carList"></div>
+</section>
+<section class="section booking-section" id="booking">
+    <h2>Book Your Car</h2><p class="section-desc">Enter your details to make a booking.</p>
+    <form id="bookingForm">
+        <label for="customerName">Full Name</label><input type="text" id="customerName" placeholder="Enter your name" required>
+        <label for="customerEmail">Email Address</label><input type="email" id="customerEmail" placeholder="Enter your email" required>
+        <label for="selectedCar">Select Car</label><select id="selectedCar" required><option value="">Choose a car</option></select>
+        <div class="form-row">
+            <div><label for="pickupDate">Pickup Date</label><input type="date" id="pickupDate" required></div>
+            <div><label for="returnDate">Return Date</label><input type="date" id="returnDate" required></div>
+        </div>
+        <div class="price-box"><span>Estimated Rental Cost</span><strong id="totalPrice">₹0</strong></div>
+        <button type="submit" id="bookButton">Confirm Booking</button><p id="message" role="status" aria-live="polite"></p>
+    </form>
+</section>
+<section class="section" id="records">
+    <h2>Booking Records</h2><p class="section-desc">View or cancel your bookings.</p><div id="bookingList"></div>
+</section>
+</main>
+<footer><p>© 2026 DriveEasy Car Rental Management System</p><p>Basic project built with HTML, CSS and JavaScript.</p></footer>
+<script>
+const cars = [
+ {id:1,name:"Maruti Swift",type:"Hatchback",seats:5,price:1500,image:"https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=800&q=80"},
+ {id:2,name:"Hyundai Creta",type:"SUV",seats:5,price:2500,image:"https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=800&q=80"},
+ {id:3,name:"Honda City",type:"Sedan",seats:5,price:2200,image:"https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80"},
+ {id:4,name:"Mahindra Thar",type:"Off-road SUV",seats:4,price:3000,image:"https://images.unsplash.com/photo-1517026575980-3e1e2dedeab4?auto=format&fit=crop&w=800&q=80"},
+ {id:5,name:"Toyota Innova",type:"Family MPV",seats:7,price:3500,image:"https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80"},
+ {id:6,name:"BMW 3 Series",type:"Luxury Sedan",seats:5,price:6000,image:"https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=800&q=80"}
+];
+const carList=document.getElementById("carList"), selectedCar=document.getElementById("selectedCar"), pickupDate=document.getElementById("pickupDate"), returnDate=document.getElementById("returnDate"), bookingForm=document.getElementById("bookingForm"), totalPrice=document.getElementById("totalPrice"), message=document.getElementById("message"), bookingList=document.getElementById("bookingList");
+const STORAGE_KEY="driveEasyBookings";
+function money(amount){return new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:2}).format(amount);}
+function todayString(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function getBookings(){try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");return Array.isArray(data)?data:[];}catch{return [];}}
+function saveBookings(bookings){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(bookings));return true;}catch{showMessage("Unable to save bookings in this browser.",true);return false;}}
+function showMessage(text,error=false){message.textContent=text;message.style.color=error?"#b91c1c":"#15803d";}
+function displayCars(){
+ cars.forEach(car=>{
+  const card=document.createElement("article");card.className="car-card";
+  const img=document.createElement("img");img.src=car.image;img.alt=car.name;img.loading="lazy";img.onerror=()=>img.style.display="none";
+  const info=document.createElement("div");info.className="car-info";
+  const title=document.createElement("h3");title.textContent=car.name;
+  const details=document.createElement("p");details.textContent=`${car.type} · ${car.seats} seats`;
+  const bottom=document.createElement("div");bottom.className="car-bottom";
+  const price=document.createElement("div");price.className="car-price";price.textContent=money(car.price)+" / day";
+  const button=document.createElement("button");button.className="select-car";button.type="button";button.textContent="Book Now";
+  button.addEventListener("click",()=>{selectedCar.value=String(car.id);updatePrice();document.getElementById("booking").scrollIntoView({behavior:"smooth"});});
+  bottom.append(price,button);info.append(title,details,bottom);card.append(img,info);carList.appendChild(card);
+  const option=document.createElement("option");option.value=String(car.id);option.textContent=`${car.name} — ${money(car.price)}/day`;selectedCar.appendChild(option);
+ });
+}
+function rentalDays(){if(!pickupDate.value||!returnDate.value)return 0;const start=Date.parse(pickupDate.value+"T00:00:00Z"),end=Date.parse(returnDate.value+"T00:00:00Z");if(!Number.isFinite(start)||!Number.isFinite(end)||end<start)return 0;return Math.max(1,Math.round((end-start)/86400000));}
+function updatePrice(){const car=cars.find(c=>String(c.id)===selectedCar.value),days=rentalDays();totalPrice.textContent=car&&days?money(car.price*days):money(0);}
+function isAvailable(carId,startDate,endDate){return !getBookings().some(booking=>booking.carId===carId&&booking.status!=="Cancelled"&&startDate<booking.returnDate&&endDate>booking.pickupDate);}
+function renderBookings(){
+ bookingList.replaceChildren();const bookings=getBookings();
+ if(!bookings.length){const empty=document.createElement("p");empty.className="empty-state";empty.textContent="No bookings yet. Book your first car!";bookingList.appendChild(empty);return;}
+ [...bookings].reverse().forEach(booking=>{
+  const car=cars.find(c=>c.id===booking.carId),record=document.createElement("article");record.className="booking-record";
+  const heading=document.createElement("h3");heading.textContent=`${booking.name} — ${car?car.name:"Car"}`;
+  const email=document.createElement("p");email.textContent=`Booking ID: ${booking.id} | ${booking.email}`;
+  const dates=document.createElement("p");dates.textContent=`Pickup: ${booking.pickupDate} | Return: ${booking.returnDate}`;
+  const amount=document.createElement("p");amount.textContent=`Total: ${money(booking.total)}`;
+  const status=document.createElement("p");status.textContent=`Status: ${booking.status}`;
+  record.append(heading,email,dates,amount,status);
+  if(booking.status!=="Cancelled"){
+   const cancel=document.createElement("button");cancel.type="button";cancel.className="cancel-booking";cancel.textContent="Cancel Booking";
+   cancel.addEventListener("click",()=>{if(!confirm("Are you sure you want to cancel this booking?"))return;const latest=getBookings(),target=latest.find(b=>b.id===booking.id);if(!target||target.status==="Cancelled")return;target.status="Cancelled";if(saveBookings(latest))renderBookings();});
+   record.appendChild(cancel);
+  }
+  bookingList.appendChild(record);
+ });
+}
+bookingForm.addEventListener("submit",event=>{
+ event.preventDefault();showMessage("");
+ const name=document.getElementById("customerName").value.trim(),email=document.getElementById("customerEmail").value.trim(),carId=Number(selectedCar.value),car=cars.find(c=>c.id===carId),days=rentalDays(),today=todayString();
+ if(!name||!email||!car){showMessage("Please fill in all required fields.",true);return;}
+ if(!pickupDate.value||pickupDate.value<today){showMessage("Pickup date cannot be in the past.",true);return;}
+ if(!returnDate.value||returnDate.value<pickupDate.value){showMessage("Return date must be on or after pickup date.",true);return;}
+ if(!days){showMessage("Please select valid rental dates.",true);return;}
+ if(!isAvailable(carId,pickupDate.value,returnDate.value)){showMessage("This car is already booked for those dates.",true);return;}
+ const bookings=getBookings(),booking={id:"BK"+Date.now().toString(36).toUpperCase(),name,email,carId,pickupDate:pickupDate.value,returnDate:returnDate.value,days,total:car.price*days,status:"Confirmed"};
+ bookings.push(booking);if(!saveBookings(bookings))return;
+ showMessage(`Booking confirmed! ID: ${booking.id}. Total: ${money(booking.total)}`);
+ bookingForm.reset();selectedCar.value="";updatePrice();renderBookings();
+});
+const today=todayString();pickupDate.min=today;returnDate.min=today;
+pickupDate.addEventListener("change",()=>{returnDate.min=pickupDate.value||today;if(returnDate.value&&returnDate.value<returnDate.min)returnDate.value="";updatePrice();});
+returnDate.addEventListener("change",updatePrice);selectedCar.addEventListener("change",updatePrice);
+displayCars();updatePrice();renderBookings();
+</script>
+</body>
+</html>
